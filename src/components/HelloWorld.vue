@@ -1,42 +1,44 @@
 <template>
   <div>
-
-    <h1>{{ msg }}</h1>
-
-    <p>
-      <a
-        href="https://vitejs.dev/guide/features.html"
-        target="_blank"
-      >Vite Documentation</a> |
-      <a
-        href="https://vuejs.org/v2/guide/"
-        target="_blank"
-      >Vue 2 Documentation</a>
-    </p>
-
-    <button @click="count++">count is: {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test hot module replacement.
-    </p>
+    {{ claims }}
+    <json-forms
+      :data="claims"
+      :schema="jsonSchema"
+      :uischema="uiSchema"
+      :renderers="renderer"
+      @change="onChange"
+    />
   </div>
 </template>
-
 <script>
-export default {
+import { defineComponent, ref } from "@vue/composition-api";
+import { JsonForms } from "@jsonforms/vue2";
+import { entry as StringRenderer } from "./Stringrenderer.vue";
+import { entry as LayoutRenderer } from "./VerticalLayoutRenderer.vue";
+export default defineComponent({
   props: {
     msg: String,
   },
-  data() {
-    return {
-      count: 0,
+  components: { JsonForms },
+  setup() {
+    const claims = ref({});
+    const uiSchema = {
+      type: "VerticalLayout",
+      elements: [{ type: "Control", scope: "#/properties/name" }],
     };
+    const renderer = [StringRenderer, LayoutRenderer];
+    const jsonSchema = {
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    };
+    const onChange = (e) => {
+      console.log(e);
+      claims.value = e.data;
+    };
+    return { claims, uiSchema, jsonSchema, onChange, renderer };
   },
-};
+});
 </script>
-
-<style scoped>
-a {
-  color: #42b983;
-}
-</style>
